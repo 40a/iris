@@ -20,6 +20,7 @@ type Kube interface {
 	Watch(WatchFn)
 	GetIRISConfigmap(string, string) ([]byte, error)
 	ResourceByLabelsExist(interface{}, map[string]string) (bool, error)
+	MatchPodToStatus(string, string, []string) bool
 }
 
 type kube struct {
@@ -74,6 +75,27 @@ func (k *kube) ResourceByLabelsExist(obj interface{}, labels map[string]string) 
 		return false, err
 	}
 	return len(pods.Items) > 0, nil
+}
+
+func (k *kube) MatchPodToStatus(namespace string, name string, statuses []string) bool {
+	includes := false
+	opt := metav1.GetOptions{}
+	pod, err := k.Clientset.CoreV1().Pods(namespace).Get(name, opt)
+	if err != nil {
+		return includes
+	}
+	containerStatuses := pod.Status.ContainerStatuses
+	for index := range containerStatuses {
+		containerStatus := containerStatuses[index]
+		actualStatus := containerStatus.State.Waiting.Reason
+		for statusIndex := range statuses {
+			status := statuses[statusIndex]
+			if status == actualStatus {
+				includes = true
+			}
+		}
+	}
+	return includes
 }
 
 func NewKubeManager(kubeconfig string, incluster bool) Kube {

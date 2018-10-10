@@ -40,6 +40,11 @@ func (_f *f) Build(json map[string]interface{}, s Service, k kube.Kube) (Filter,
 				Service: s,
 			}
 			break
+		case TypePodStatus:
+			f = &podStatus{
+				kube: k,
+			}
+			break
 		}
 		if f == nil {
 			return nil, fmt.Errorf("Type %s is not supported", json["type"])

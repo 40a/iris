@@ -1,11 +1,13 @@
 package filter
 
+// All must be lowercased
 const (
 	TypeReason    = "reason"
 	TypeNamespace = "namespace"
 	TypeJSONPath  = "jsonpath"
 	TypeLabel     = "labels"
 	TypeAny       = "any"
+	TypePodStatus = "podstatus"
 )
 
 type Filter interface {
